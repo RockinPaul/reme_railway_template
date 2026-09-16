@@ -123,3 +123,5 @@ Markdown you can read and edit. Indexes rebuild from the files.
 
 ReMe is [Apache-2.0](https://github.com/agentscope-ai/ReMe/blob/main/LICENSE). Caddy is Apache-2.0.
 The glue in this repository is MIT.
+
+> Card icon: `icon.png` is upstream's `docs/figure/reme-icon.svg` rendered to 512x512, re-hosted here so the marketplace URL stays stable.
