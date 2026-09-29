@@ -24,6 +24,10 @@ container exits and Railway restarts it.
 | `REME_USERNAME` | `admin` | Username for the same. |
 | `LLM_API_KEY` | *(empty)* | Optional. Enables `auto_memory`, `auto_resource`, `auto_dream` and proactive refresh. |
 | `LLM_BASE_URL` | *(empty)* | Optional. Any OpenAI-compatible endpoint. |
+| `EMBEDDING_API_KEY` | *(not set)* | Optional. Turns on semantic retrieval alongside BM25; see [Embeddings](#embeddings). Add it yourself — the template does not create it. |
+| `EMBEDDING_BASE_URL` | DashScope compatible-mode | Optional. Any OpenAI-compatible embeddings endpoint. |
+| `EMBEDDING_MODEL_NAME` | `text-embedding-v4` | Optional. Must match the endpoint. |
+| `EMBEDDING_DIMENSIONS` | `1024` | Optional. Must equal the length of the vectors the model returns. |
 | `PORT` | `8080` | The port Railway's healthcheck probes and the domain targets. Leave it alone. |
 | `REME_WORKSPACE_DIR` | `/data/workspace` | Baked. The Markdown workspace on the volume. |
 
@@ -44,8 +48,43 @@ initialises models eagerly, so an empty `LLM_API_KEY` aborts the boot entirely �
 says the keyless features work, and locally they do, but the process never reaches the point of
 serving. The entrypoint therefore supplies a placeholder when no key is set, which is what makes the
 keyless half actually work here. Anything that calls a model then fails at call time with a provider
-auth error, which is the truthful result for a deployment with no key. Embeddings are off by default; enable
-`components.as_embedding` and `components.embedding_store` in the config for semantic retrieval.
+auth error, which is the truthful result for a deployment with no key.
+
+## Embeddings
+
+Upstream ships its embedding components commented out, so out of the box search is BM25 plus
+wikilink expansion: it finds notes that share words with the query. Set `EMBEDDING_API_KEY` and the
+entrypoint layers `embeddings.yaml` over the default config, which adds vector search fused with
+BM25 — a query like "why would a database refuse to initialise on a new disk" then finds a note
+about `PGDATA` and `lost+found` that shares none of its words. With no key the stock config is used
+unchanged. The key stays in the environment and is expanded by ReMe when it reads the file, so it
+never appears on a command line.
+
+The defaults are ReMe's own: `text-embedding-v4` at 1024 dimensions on DashScope. A cheap
+alternative that works as-is is Perplexity's embedding model through
+[OpenRouter](https://openrouter.ai/perplexity/pplx-embed-v1-0.6b), about $0.004 per million tokens
+and natively 1024-dimensional:
+
+| Variable | Value |
+|---|---|
+| `EMBEDDING_API_KEY` | your OpenRouter key |
+| `EMBEDDING_BASE_URL` | `https://openrouter.ai/api/v1` |
+| `EMBEDDING_MODEL_NAME` | `perplexity/pplx-embed-v1-0.6b` |
+
+Things worth knowing:
+
+- **Notes you already have are embedded on the next boot.** ReMe backfills vectors for every
+  indexed chunk that lacks one, so adding a key to an existing deployment needs no reindex. Vectors
+  are cached on the volume per embedding setup, so a redeploy does not pay for them again, and
+  changing the model, endpoint or dimensions re-embeds everything once.
+- **`EMBEDDING_DIMENSIONS` must match the model exactly.** ReMe rejects vectors of any other length.
+- **A wrong key does not stop the service.** Keyword search keeps working, semantic results are
+  simply absent, and the deploy log shows the provider's 401.
+- **Proactive refresh has a threshold tuned for the default model.** Its `known_threshold: 0.85` is
+  calibrated for `text-embedding-v4`; other models score on their own scale (a related pair scores
+  about 0.4 with `pplx-embed-v1-0.6b`), so with another model proactive refresh treats fewer topics
+  as already known. Search itself fuses results by rank, not raw score, and is unaffected. Proactive
+  refresh also needs `LLM_API_KEY`.
 
 ## Security
 
@@ -117,7 +156,8 @@ from drifting.
 ## What persists
 
 `/data/workspace` holds the entire memory: daily notes, digests, indexes and metadata, all as
-Markdown you can read and edit. Indexes rebuild from the files.
+Markdown you can read and edit. Indexes rebuild from the files; embedding vectors, when enabled,
+are cached under `metadata/embedding_store`.
 
 ## Licences
 

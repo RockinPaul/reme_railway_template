@@ -72,9 +72,18 @@ can publish the unauthenticated API. `service.host=0.0.0.0` is deliberately neve
 Leave them empty and ReMe still works as a searchable, agent-writable Markdown workspace. That took
 one fix to be true in a container: ReMe constructs its LLM client while the service starts, so an
 empty key aborts the boot before anything is served. The entrypoint supplies a placeholder when no
-key is configured, and model-backed jobs then fail at call time rather than at startup. Embeddings
-are off by default and need no key at all; enable them in the config if you want semantic retrieval
-alongside BM25.
+key is configured, and model-backed jobs then fail at call time rather than at startup.
+
+**Optional semantic search.** Out of the box ReMe searches with BM25 and wikilinks. Add
+`EMBEDDING_API_KEY` to the service and it also searches by meaning, fused with BM25, so a note is
+found even when it shares no words with the query. The defaults are ReMe's own — `text-embedding-v4`
+at 1024 dimensions on DashScope. A cheap alternative is Perplexity's embedding model through
+[OpenRouter](https://openrouter.ai/perplexity/pplx-embed-v1-0.6b): set `EMBEDDING_BASE_URL` to
+`https://openrouter.ai/api/v1` and `EMBEDDING_MODEL_NAME` to `perplexity/pplx-embed-v1-0.6b`.
+Notes you already have are embedded on the next boot, vectors are cached on the volume, and without a
+key the deployment runs exactly as before. Proactive refresh's `known_threshold` of 0.85 is tuned for
+the default model; other models score lower (about 0.4 for a related pair with the Perplexity model),
+which affects only that feature, not search.
 
 **Builds are reproducible.** ReMe publishes no container image, so this one is built here and all 149
 resolved packages are pinned with hashes in `requirements.lock`. `pip --require-hashes` refuses

@@ -57,6 +57,26 @@ if [ -z "${LLM_API_KEY:-}" ]; then
          "auto_resource, auto_dream and proactive refresh will not until you add one"
 fi
 
+# ---------------------------------------------------------------------------
+# Embeddings, only when a key is set
+# ---------------------------------------------------------------------------
+# Upstream ships the embedding components commented out, so a stock deployment
+# searches with BM25 and wikilinks only. Semantic retrieval is switched on by
+# layering /etc/reme/embeddings.yaml over the default config, and only when
+# EMBEDDING_API_KEY is present: a deployment without a key boots on the stock
+# config exactly as before. The key itself stays in the environment and is
+# expanded by ReMe when it reads the file, never passed as an argument.
+set -- workspace_dir="${WORKSPACE}" service.port="${INTERNAL_PORT}"
+if [ -n "${EMBEDDING_API_KEY:-}" ]; then
+    set -- config=/etc/reme/embeddings.yaml "$@"
+    embedding_host="${EMBEDDING_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}"
+    embedding_host="${embedding_host#*://}"
+    echo "reme: embeddings on - ${EMBEDDING_MODEL_NAME:-text-embedding-v4}" \
+         "(${EMBEDDING_DIMENSIONS:-1024} dims) at ${embedding_host%%/*}"
+else
+    echo "reme: no EMBEDDING_API_KEY set - search is BM25 + wikilinks only"
+fi
+
 echo "reme: workspace at ${WORKSPACE}"
 echo "reme: serving on 0.0.0.0:${LISTEN_PORT} behind basic auth as '${REME_USERNAME}'"
 
@@ -67,7 +87,7 @@ echo "reme: serving on 0.0.0.0:${LISTEN_PORT} behind basic auth as '${REME_USERN
 # interface. `service.host=0.0.0.0` is deliberately NOT set: the only route in
 # is through Caddy, which means there is no configuration mistake that can
 # expose the unauthenticated API directly.
-reme start workspace_dir="${WORKSPACE}" service.port="${INTERNAL_PORT}" &
+reme start "$@" &
 REME_PID=$!
 
 # Caddy starts only once ReMe answers, so Railway's healthcheck cannot report

@@ -1,0 +1,34 @@
+# Semantic retrieval for ReMe, layered over the packaged default config.
+#
+# Upstream ships this block commented out in reme/config/default.yaml, so a
+# stock deployment is BM25 + wikilinks only. The entrypoint passes this file as
+# `config=` ONLY when EMBEDDING_API_KEY is set; with no key the stock config is
+# used unchanged.
+#
+# The values stay ${...} placeholders on purpose: ReMe expands them from the
+# environment when it reads the file, so the key never appears on a command
+# line (CLI `key=value` overrides are not expanded and would land in `ps`).
+extends: default
+
+components:
+  as_embedding:
+    default:
+      backend: ${EMBEDDING_BACKEND:-openai}
+      model: ${EMBEDDING_MODEL_NAME:-text-embedding-v4}
+      dimensions: ${EMBEDDING_DIMENSIONS:-1024}
+      credential:
+        api_key: ${EMBEDDING_API_KEY}
+        base_url: ${EMBEDDING_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      parameters: {}
+
+  embedding_store:
+    default:
+      backend: local
+      as_embedding: default
+
+  # The third switch, and the easy one to miss: without it the model above is
+  # configured but the file store never asks for vectors, and search stays
+  # keyword-only with no error anywhere.
+  file_store:
+    default:
+      embedding_store: default

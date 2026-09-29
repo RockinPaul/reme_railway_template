@@ -41,5 +41,8 @@ ENV REME_WORKSPACE_DIR=/data/workspace \
     PORT=8080
 
 COPY Caddyfile /etc/caddy/Caddyfile
+# Semantic retrieval overlay; the entrypoint applies it only when
+# EMBEDDING_API_KEY is set.
+COPY embeddings.yaml /etc/reme/embeddings.yaml
 COPY --chmod=755 entrypoint.sh /usr/local/bin/railway-entrypoint
 ENTRYPOINT ["/usr/local/bin/railway-entrypoint"]
