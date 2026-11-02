@@ -51,7 +51,7 @@ place it behind an authenticated reverse proxy — so that is what runs here, wi
 ### Deployment Dependencies
 
 - Upstream project: [agentscope-ai/ReMe](https://github.com/agentscope-ai/ReMe) (Apache-2.0),
-  package `reme-ai[core]` 0.4.1.12 with `reme-studio` 0.1.1.
+  package `reme-ai[core]` 0.4.2.1 with `reme-studio` 0.1.1.
 - Upstream documentation: [ReMe docs](https://reme.agentscope.io/).
 - Template source: [RockinPaul/reme_railway_template](https://github.com/RockinPaul/reme_railway_template) (MIT).
 

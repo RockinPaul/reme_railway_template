@@ -11,7 +11,7 @@ a volume and the whole service behind a generated password.
 | Process | Base | Public | Role |
 |---|---|---|---|
 | `caddy` | `caddy:2.11.4` (binary) | **yes** | The only public listener. Holds the credential, proxies to ReMe. |
-| `reme` | `reme-ai[core]` 0.4.1.12 | no | API, `/mcp`, Studio UI. Stays on `127.0.0.1` where upstream puts it. |
+| `reme` | `reme-ai[core]` 0.4.2.1 | no | API, `/mcp`, Studio UI. Stays on `127.0.0.1` where upstream puts it. |
 
 One container, one volume. Both processes are supervised by the entrypoint: if either exits, the
 container exits and Railway restarts it.
