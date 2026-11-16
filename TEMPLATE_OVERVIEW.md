@@ -51,7 +51,7 @@ place it behind an authenticated reverse proxy — so that is what runs here, wi
 ### Deployment Dependencies
 
 - Upstream project: [agentscope-ai/ReMe](https://github.com/agentscope-ai/ReMe) (Apache-2.0),
-  package `reme-ai[core]` 0.4.2.1 with `reme-studio` 0.1.1.
+  package `reme-ai[core]` 0.4.2.2 with `reme-studio` 0.1.1.
 - Upstream documentation: [ReMe docs](https://reme.agentscope.io/).
 - Template source: [RockinPaul/reme_railway_template](https://github.com/RockinPaul/reme_railway_template) (MIT).
 
@@ -85,7 +85,7 @@ key the deployment runs exactly as before. Proactive refresh's `known_threshold`
 the default model; other models score lower (about 0.4 for a related pair with the Perplexity model),
 which affects only that feature, not search.
 
-**Builds are reproducible.** ReMe publishes no container image, so this one is built here and all 149
+**Builds are reproducible.** ReMe publishes no container image, so this one is built here and all 142
 resolved packages are pinned with hashes in `requirements.lock`. `pip --require-hashes` refuses
 anything that does not match, so an upstream re-upload fails the build rather than quietly changing
 the image.

@@ -3,9 +3,9 @@
 # Unlike the rest of this portfolio there is no upstream image to pin: ReMe
 # ships as a pip package with no Dockerfile, no compose file and no container
 # documentation at all. So this image is built here, and `requirements.lock`
-# pins all 149 resolved packages with hashes so a rebuild six months from now
+# pins all 142 resolved packages with hashes so a rebuild six months from now
 # produces what was tested rather than whatever PyPI resolves that day.
-ARG CADDY_VERSION=2.11.4
+ARG CADDY_VERSION=2.11.9
 ARG PYTHON_VERSION=3.12-slim
 
 FROM caddy:${CADDY_VERSION} AS caddy-src
