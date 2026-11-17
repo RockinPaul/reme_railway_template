@@ -10,8 +10,8 @@ a volume and the whole service behind a generated password.
 
 | Process | Base | Public | Role |
 |---|---|---|---|
-| `caddy` | `caddy:2.11.4` (binary) | **yes** | The only public listener. Holds the credential, proxies to ReMe. |
-| `reme` | `reme-ai[core]` 0.4.2.1 | no | API, `/mcp`, Studio UI. Stays on `127.0.0.1` where upstream puts it. |
+| `caddy` | `caddy:2.11.9` (binary) | **yes** | The only public listener. Holds the credential, proxies to ReMe. |
+| `reme` | `reme-ai[core]` 0.4.2.2 | no | API, `/mcp`, Studio UI. Stays on `127.0.0.1` where upstream puts it. |
 
 One container, one volume. Both processes are supervised by the entrypoint: if either exits, the
 container exits and Railway restarts it.
@@ -138,7 +138,7 @@ you enable the LLM features, remember that jobs then spend your provider key.
 
 ReMe publishes no container image — no Dockerfile, no compose file, nothing in its docs — so this
 image is built here from PyPI. That makes `pip install` a resolution step rather than a fixed
-artefact, which is why all 149 resolved packages are pinned with hashes in `requirements.lock` and
+artefact, which is why all 142 resolved packages are pinned with hashes in `requirements.lock` and
 installed with `--require-hashes`. A rebuild installs exactly what was tested, and an upstream
 re-upload fails the build instead of silently changing the image.
 
